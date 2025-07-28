@@ -74,6 +74,13 @@ module.exports = function parseConfig() {
     ignoreLabels = ConfigParser.parseEnum(process.env.INPUT_IGNORELABELS);
   }
 
+  let llmGatewayApiKey;
+  if (process.env.INPUT_LLMGATEWAYAPIKEY) {
+    llmGatewayApiKey = ConfigParser.parseString(
+      process.env.INPUT_LLMGATEWAYAPIKEY
+    );
+  }
+
   return {
     types,
     scopes,
@@ -87,6 +94,7 @@ module.exports = function parseConfig() {
     validateSingleCommit,
     validateSingleCommitMatchesPrTitle,
     githubBaseUrl,
-    ignoreLabels
+    ignoreLabels,
+    llmGatewayApiKey
   };
 };
