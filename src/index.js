@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
+const LlmGatewayClient = require('./llmGatewayClient');
 const parseConfig = require('./parseConfig');
 const validatePrTitle = require('./validatePrTitle');
 
@@ -18,7 +19,8 @@ module.exports = async function run() {
       validateSingleCommit,
       validateSingleCommitMatchesPrTitle,
       githubBaseUrl,
-      ignoreLabels
+      ignoreLabels,
+      llmGatewayApiKey
     } = parseConfig();
 
     const client = github.getOctokit(process.env.GITHUB_TOKEN, {
@@ -134,7 +136,50 @@ module.exports = async function run() {
           }
         }
       } catch (error) {
-        validationError = error;
+        if (llmGatewayApiKey) {
+          try {
+            core.info(
+              'PR title validation failed, attempting to generate semantic title using LLM Gateway...'
+            );
+
+            const llmClient = new LlmGatewayClient(llmGatewayApiKey);
+            const generatedTitle = await llmClient.generateSemanticTitle(
+              pullRequest.title,
+              pullRequest.body
+            );
+
+            core.info(`Generated semantic title: "${generatedTitle}"`);
+
+            await client.rest.pulls.update({
+              owner,
+              repo,
+              pull_number: contextPullRequest.number,
+              title: generatedTitle
+            });
+
+            core.info(`Successfully updated PR title to: "${generatedTitle}"`);
+
+            await validatePrTitle(generatedTitle, {
+              types,
+              scopes,
+              requireScope,
+              disallowScopes,
+              subjectPattern,
+              subjectPatternError,
+              headerPattern,
+              headerPatternCorrespondence
+            });
+
+            core.info('Generated title passed validation');
+          } catch (llmError) {
+            core.warning(
+              `Failed to generate or update PR title: ${llmError.message}`
+            );
+            validationError = error;
+          }
+        } else {
+          validationError = error;
+        }
       }
     }
 
