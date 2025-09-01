@@ -24,6 +24,8 @@ Used by: [Electron](https://github.com/electron/electron) · [Vite](https://gith
 >
 > **No manual work needed** - just create your PR and watch the AI automatically fix the title!
 
+![Preview](preview.png)
+
 **🤖 AI Auto-Generation Examples:**
 
 When you create a PR with a non-semantic title like "Update login functionality", the **FREE AI** will analyze your changes and automatically convert it to:
