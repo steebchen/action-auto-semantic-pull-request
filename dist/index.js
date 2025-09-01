@@ -33750,8 +33750,10 @@ class AiClient {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${this.apiKey}`,
           'Content-Length': Buffer.byteLength(requestBody),
-          'x-llmgateway-kind': 'auto-pr',
-          'x-llmgateway-repo': this.repositorySlug
+          'x-source':
+            'https://github.com/steebchen/action-auto-semantic-pull-request'
+          // 'x-llmgateway-kind': 'auto-pr',
+          // 'x-llmgateway-repo': this.repositorySlug
         }
       };
 
@@ -34062,7 +34064,7 @@ module.exports = async function run() {
         repo,
         sha: pullRequest.head.sha,
         state: newStatus,
-        target_url: 'https://github.com/amannn/action-semantic-pull-request',
+        target_url: 'https://github.com/steebchen/action-auto-semantic-pull-request',
         description: isWip
           ? 'This PR is marked with "[WIP]".'
           : validationError

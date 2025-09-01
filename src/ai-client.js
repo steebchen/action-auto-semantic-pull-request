@@ -52,8 +52,10 @@ class AiClient {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${this.apiKey}`,
           'Content-Length': Buffer.byteLength(requestBody),
-          'x-llmgateway-kind': 'auto-pr',
-          'x-llmgateway-repo': this.repositorySlug
+          'x-source':
+            'https://github.com/steebchen/action-auto-semantic-pull-request'
+          // 'x-llmgateway-kind': 'auto-pr',
+          // 'x-llmgateway-repo': this.repositorySlug
         }
       };
 
