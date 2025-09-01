@@ -105,7 +105,7 @@ See the [event triggers documentation](#event-triggers) below to learn more abou
 
 **Already using the action? Here's how AI title generation works:**
 
-1. **✅ FREE by default** - Uses `llama-3.1-70b-instruct-free` model at no cost
+1. **✅ FREE by default** - Uses `llama-3.3-70b-instruct-free` model at no cost
 2. **🆓 Powered by [llmgateway.io](https://llmgateway.io)** - No credit card required
 3. **🤖 Smart analysis** - Looks at your PR description, commits, and file changes
 4. **⚡ Instant results** - Automatically updates your PR title in seconds
@@ -121,7 +121,7 @@ When a pull request title doesn't conform to conventional commits format, the ac
 3. Automatically update the PR title
 4. Continue with normal validation
 
-> **💡 Pro Tip**: This action is completely FREE to use! The default configuration uses the free `llama-3.1-70b-instruct-free` model on llmgateway.io, which provides excellent results without any cost.
+> **💡 Pro Tip**: This action is completely FREE to use! The default configuration uses the free `llama-3.3-70b-instruct-free` model on llmgateway.io, which provides excellent results without any cost.
 
 ## Configuration
 
@@ -147,10 +147,10 @@ feat(ui): Add `Button` component
           # For OpenAI directly: https://api.openai.com
           # For Azure OpenAI: https://your-resource.openai.azure.com
           aiBaseUrl: https://api.llmgateway.io
-          # AI model to use (default: llama-3.1-70b-instruct-free - FREE!)
-          # FREE models on llmgateway.io: llama-3.1-70b-instruct-free (recommended)
-          # Paid models: gpt-4o-mini, gpt-4, gpt-3.5-turbo (OpenAI/llmgateway.io)
-          aiModel: llama-3.1-70b-instruct-free
+          # AI model to use (default: llama-3.3-70b-instruct-free - FREE!)
+          # FREE models on llmgateway.io: llama-3.3-70b-instruct-free (recommended)
+          # Paid models: see all on https://llmgateway.io/models
+          aiModel: llama-3.3-70b-instruct-free
           # Configure which types are allowed (newline-delimited).
           # Default: https://github.com/commitizen/conventional-commit-types
           types: |

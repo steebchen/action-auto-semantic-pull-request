@@ -9,7 +9,7 @@ class AiClient {
     apiKey,
     repositorySlug,
     baseUrl = 'https://api.llmgateway.io',
-    model = 'llama-3.1-70b-instruct-free'
+    model = 'llama-3.3-70b-instruct-free'
   ) {
     this.apiKey = apiKey;
     this.repositorySlug = repositorySlug;

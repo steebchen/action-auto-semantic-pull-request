@@ -188,7 +188,7 @@ it('accepts custom base URL', async () => {
   expect(result).toBe('feat: Add custom API');
 });
 
-it('uses llama-3.1-70b-instruct-free as default model', async () => {
+it('uses llama-3.3-70b-instruct-free as default model', async () => {
   const mockResponse = {
     choices: [
       {
@@ -228,7 +228,7 @@ it('uses llama-3.1-70b-instruct-free as default model', async () => {
   const client = new AiClient('test-api-key');
   await client.generateSemanticTitle('Add feature', 'Description');
 
-  expect(requestBodyParsed.model).toBe('llama-3.1-70b-instruct-free');
+  expect(requestBodyParsed.model).toBe('llama-3.3-70b-instruct-free');
 });
 
 it('uses custom model when specified', async () => {
