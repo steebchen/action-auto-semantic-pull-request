@@ -1,10 +1,20 @@
-# action-semantic-pull-request
+# action-auto-semantic-pull-request
 
-This is a GitHub Action that ensures that your pull request titles match the [Conventional Commits spec](https://www.conventionalcommits.org/). Typically, this is used in combination with a tool like [semantic-release](https://github.com/semantic-release/semantic-release) to automate releases.
+**🤖 AI-Powered Fork**: This is a fork of [action-semantic-pull-request](https://github.com/amannn/action-semantic-pull-request) that **automatically generates semantic pull request titles using AI** powered by [llmgateway.io](https://llmgateway.io).
+
+This GitHub Action ensures that your pull request titles match the [Conventional Commits spec](https://www.conventionalcommits.org/) by automatically generating appropriate titles when they don't conform to the standard. When a PR title doesn't follow conventional commits format, the action uses AI to analyze the PR content and automatically set a properly formatted semantic title. Typically, this is used in combination with a tool like [semantic-release](https://github.com/semantic-release/semantic-release) to automate releases.
 
 Used by: [Electron](https://github.com/electron/electron) · [Vite](https://github.com/vitejs/vite) · [Excalidraw](https://github.com/excalidraw/excalidraw) · [Apache](https://github.com/apache/pulsar) · [Vercel](https://github.com/vercel/ncc) · [Microsoft](https://github.com/microsoft/SynapseML) · [Firebase](https://github.com/firebase/flutterfire) · [AWS](https://github.com/aws-ia/terraform-aws-eks-blueprints) – and [many more](https://github.com/amannn/action-semantic-pull-request/network/dependents).
 
 ## Examples
+
+**🤖 AI Auto-Generation Examples:**
+
+When you create a PR with a non-semantic title like "Update login functionality", the AI will analyze your changes and automatically convert it to:
+- `feat(auth): Add support for OAuth 2.0 authentication`
+
+Or if you submit "Bug fixes" as the title, it might become:
+- `fix: Resolve memory leak in user session handling`
 
 **Valid pull request titles:**
 - fix: Correct typo
@@ -21,7 +31,7 @@ See [Conventional Commits](https://www.conventionalcommits.org/) for more exampl
 1. If your goal is to create squashed commits that will be used for automated releases, you'll want to configure your GitHub repository to [use the squash & merge strategy](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/configuring-commit-squashing-for-pull-requests) and tick the option "Default to PR title for squash merge commits".
 2. [Add the action](https://docs.github.com/en/actions/quickstart) with the following configuration:
 ```yml
-name: "Lint PR"
+name: "Auto Semantic PR"
 
 on:
   pull_request_target:
@@ -32,17 +42,34 @@ on:
 
 jobs:
   main:
-    name: Validate PR title
+    name: Validate and auto-fix PR title
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: read
+      pull-requests: write  # Required for AI title generation
     steps:
-      - uses: amannn/action-semantic-pull-request@v5
+      - uses: steebchen/action-auto-semantic-pull-request@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LLM_GATEWAY_API_KEY: ${{ secrets.LLM_GATEWAY_API_KEY }}  # Required for AI title generation
 ```
 
 See the [event triggers documentation](#event-triggers) below to learn more about what `pull_request_target` means.
+
+### Setting up AI Title Generation
+
+To enable automatic semantic title generation, you need to:
+
+1. **Get an API key from [llmgateway.io](https://llmgateway.io)**
+2. **Add the API key to your repository secrets:**
+   - Go to your repository → Settings → Secrets and variables → Actions
+   - Add a new secret named `LLM_GATEWAY_API_KEY` with your API key as the value
+3. **Ensure the action has `pull-requests: write` permission** (shown in the example above)
+
+When a pull request title doesn't conform to conventional commits format, the action will:
+1. Analyze the PR description, commit messages, and file changes
+2. Generate an appropriate semantic title using AI
+3. Automatically update the PR title
+4. Continue with normal validation
 
 ## Configuration
 
@@ -60,6 +87,8 @@ feat(ui): Add `Button` component
 
 ```yml
         with:
+          # Enable/disable AI title generation (default: true if LLM_GATEWAY_API_KEY is provided)
+          aiTitleGeneration: true
           # Configure which types are allowed (newline-delimited).
           # Default: https://github.com/commitizen/conventional-commit-types
           types: |
