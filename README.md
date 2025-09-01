@@ -1,8 +1,18 @@
 # action-auto-semantic-pull-request
 
+> ## 🎉 **COMPLETELY FREE TO USE** 🎉
+>
+> **No credit card • No subscription • No hidden costs**
+>
+> Get your **FREE API key** in 30 seconds at [llmgateway.io](https://llmgateway.io) and start using AI-powered semantic PR titles immediately!
+
 **🤖 AI-Powered Fork**: This is a fork of [action-semantic-pull-request](https://github.com/amannn/action-semantic-pull-request) that **automatically generates semantic pull request titles using AI completions**.
 
-**✨ FREE to use**: Get started immediately with [llmgateway.io](https://llmgateway.io) - no credit card required for signup and uses free models by default. Any OpenAI-compatible API can also be used.
+**Why this is better:**
+- ✅ **100% FREE** - Uses free models by default
+- 🚀 **Zero setup friction** - Get API key without credit card at [llmgateway.io](https://llmgateway.io)
+- 🤖 **Smart AI generation** - Automatically fixes non-semantic PR titles
+- 🔧 **Fully configurable** - Works with any OpenAI-compatible API
 
 This GitHub Action ensures that your pull request titles match the [Conventional Commits spec](https://www.conventionalcommits.org/) by automatically generating appropriate titles when they don't conform to the standard. When a PR title doesn't follow conventional commits format, the action uses AI to analyze the PR content and automatically set a properly formatted semantic title. Typically, this is used in combination with a tool like [semantic-release](https://github.com/semantic-release/semantic-release) to automate releases.
 
@@ -10,13 +20,19 @@ Used by: [Electron](https://github.com/electron/electron) · [Vite](https://gith
 
 ## Examples
 
+> ### 🆓 **FREE AI Magic in Action!**
+>
+> **No manual work needed** - just create your PR and watch the AI automatically fix the title!
+
 **🤖 AI Auto-Generation Examples:**
 
-When you create a PR with a non-semantic title like "Update login functionality", the AI will analyze your changes and automatically convert it to:
+When you create a PR with a non-semantic title like "Update login functionality", the **FREE AI** will analyze your changes and automatically convert it to:
 - `feat(auth): Add support for OAuth 2.0 authentication`
 
 Or if you submit "Bug fixes" as the title, it might become:
 - `fix: Resolve memory leak in user session handling`
+
+**✅ All these transformations happen automatically with the FREE llama model!**
 
 **Valid pull request titles:**
 - fix: Correct typo
@@ -30,8 +46,25 @@ See [Conventional Commits](https://www.conventionalcommits.org/) for more exampl
 
 ## Installation
 
-1. If your goal is to create squashed commits that will be used for automated releases, you'll want to configure your GitHub repository to [use the squash & merge strategy](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/configuring-commit-squashing-for-pull-requests) and tick the option "Default to PR title for squash merge commits".
-2. [Add the action](https://docs.github.com/en/actions/quickstart) with the following configuration:
+### 🆓 **Step 1: Get Your FREE API Key** (30 seconds!)
+
+1. **Go to [llmgateway.io](https://llmgateway.io)**
+2. **Sign up with just your email** - **NO credit card required!**
+3. **Copy your API key** - it's generated instantly
+4. **That's it!** You now have access to free AI completions
+
+### 🔧 **Step 2: Add to Your Repository**
+
+1. **Add your FREE API key to GitHub secrets:**
+   - Go to your repository → **Settings** → **Secrets and variables** → **Actions**
+   - Click **"New repository secret"**
+   - Name: `AI_API_KEY`
+   - Value: Paste your free API key from llmgateway.io
+   - Click **"Add secret"**
+
+2. **Create the workflow file:**
+   - If your goal is to create squashed commits that will be used for automated releases, you'll want to configure your GitHub repository to [use the squash & merge strategy](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/configuring-commit-squashing-for-pull-requests) and tick the option "Default to PR title for squash merge commits"
+   - [Add the action](https://docs.github.com/en/actions/quickstart) with the following configuration:
 ```yml
 name: "Auto Semantic PR"
 
@@ -56,25 +89,29 @@ jobs:
           aiApiKey: ${{ secrets.AI_API_KEY }}  # Required for AI title generation
 ```
 
+> ### 🎊 **Congratulations! You're Done!**
+>
+> Your repository now has **FREE AI-powered semantic PR titles**!
+>
+> Just create a PR with any title and watch the magic happen! ✨
+
 See the [event triggers documentation](#event-triggers) below to learn more about what `pull_request_target` means.
 
-### Setting up AI Title Generation
+### 🔧 Advanced Configuration (Optional)
 
-To enable automatic semantic title generation, you need to:
+> **💡 The setup above is all you need!** The sections below are only for advanced customization.
 
-1. **Get a FREE API key:**
-   - **🆓 Recommended: [llmgateway.io](https://llmgateway.io)** - **No credit card required!**
-     - Sign up for free at [llmgateway.io](https://llmgateway.io)
-     - Get your API key instantly
-     - Uses free `llama-3.1-70b-instruct-free` model by default
-     - Built-in rate limiting and monitoring
-   - Alternative: OpenAI directly, Azure OpenAI, or any OpenAI-compatible API (paid)
-2. **Add the API key to your repository secrets:**
-   - Go to your repository → Settings → Secrets and variables → Actions
-   - Add a new secret named `AI_API_KEY` with your API key as the value
-   - Use it in your workflow with `aiApiKey: ${{ secrets.AI_API_KEY }}` (see examples above and below)
-3. **Ensure the action has `pull-requests: write` permission** (shown in the example above)
-4. **(Optional) Configure custom AI base URL and model** if not using llmgateway.io defaults
+**Already using the action? Here's how AI title generation works:**
+
+1. **✅ FREE by default** - Uses `llama-3.1-70b-instruct-free` model at no cost
+2. **🆓 Powered by [llmgateway.io](https://llmgateway.io)** - No credit card required
+3. **🤖 Smart analysis** - Looks at your PR description, commits, and file changes
+4. **⚡ Instant results** - Automatically updates your PR title in seconds
+
+**Want to customize?** You can:
+- **Use different models** - Try `gpt-4o-mini` (paid) for different results
+- **Use different providers** - OpenAI, Azure OpenAI, or any OpenAI-compatible API (paid)
+- **Configure base URLs** - Point to your own AI service
 
 When a pull request title doesn't conform to conventional commits format, the action will:
 1. Analyze the PR description, commit messages, and file changes
