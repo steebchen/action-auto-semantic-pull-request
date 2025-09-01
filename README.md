@@ -1,6 +1,8 @@
 # action-auto-semantic-pull-request
 
-**🤖 AI-Powered Fork**: This is a fork of [action-semantic-pull-request](https://github.com/amannn/action-semantic-pull-request) that **automatically generates semantic pull request titles using AI completions**. We recommend [llmgateway.io](https://llmgateway.io) as the easiest solution, but any OpenAI-compatible API can be used.
+**🤖 AI-Powered Fork**: This is a fork of [action-semantic-pull-request](https://github.com/amannn/action-semantic-pull-request) that **automatically generates semantic pull request titles using AI completions**. 
+
+**✨ FREE to use**: Get started immediately with [llmgateway.io](https://llmgateway.io) - no credit card required for signup and uses free models by default. Any OpenAI-compatible API can also be used.
 
 This GitHub Action ensures that your pull request titles match the [Conventional Commits spec](https://www.conventionalcommits.org/) by automatically generating appropriate titles when they don't conform to the standard. When a PR title doesn't follow conventional commits format, the action uses AI to analyze the PR content and automatically set a properly formatted semantic title. Typically, this is used in combination with a tool like [semantic-release](https://github.com/semantic-release/semantic-release) to automate releases.
 
@@ -59,20 +61,26 @@ See the [event triggers documentation](#event-triggers) below to learn more abou
 
 To enable automatic semantic title generation, you need to:
 
-1. **Get an API key from an OpenAI-compatible service:**
-   - **Recommended: [llmgateway.io](https://llmgateway.io)** - Easiest setup with built-in rate limiting and monitoring
-   - Alternative: OpenAI directly, Azure OpenAI, or any OpenAI-compatible API
+1. **Get a FREE API key:**
+   - **🆓 Recommended: [llmgateway.io](https://llmgateway.io)** - **No credit card required!**
+     - Sign up for free at [llmgateway.io](https://llmgateway.io)
+     - Get your API key instantly
+     - Uses free `llama-3.1-70b-instruct-free` model by default
+     - Built-in rate limiting and monitoring
+   - Alternative: OpenAI directly, Azure OpenAI, or any OpenAI-compatible API (paid)
 2. **Add the API key to your repository secrets:**
    - Go to your repository → Settings → Secrets and variables → Actions
    - Add a new secret named `AI_API_KEY` with your API key as the value
 3. **Ensure the action has `pull-requests: write` permission** (shown in the example above)
-4. **(Optional) Configure custom AI base URL** if not using llmgateway.io
+4. **(Optional) Configure custom AI base URL and model** if not using llmgateway.io defaults
 
 When a pull request title doesn't conform to conventional commits format, the action will:
 1. Analyze the PR description, commit messages, and file changes
 2. Generate an appropriate semantic title using AI
 3. Automatically update the PR title
 4. Continue with normal validation
+
+> **💡 Pro Tip**: This action is completely FREE to use! The default configuration uses the free `llama-3.1-70b-instruct-free` model on llmgateway.io, which provides excellent results without any cost.
 
 ## Configuration
 
@@ -92,13 +100,15 @@ feat(ui): Add `Button` component
         with:
           # Enable/disable AI title generation (default: true if AI_API_KEY is provided)
           aiTitleGeneration: true
+          # Alternative: You can also pass the API key directly instead of using environment variable
+          # aiApiKey: ${{ secrets.AI_API_KEY }}
           # Custom AI API base URL (default: https://api.llmgateway.io)
           # For OpenAI directly: https://api.openai.com
           # For Azure OpenAI: https://your-resource.openai.azure.com
           aiBaseUrl: https://api.llmgateway.io
-          # AI model to use (default: llama-3.1-70b-instruct-free)
-          # For OpenAI: gpt-4o-mini, gpt-4, gpt-3.5-turbo
-          # For llmgateway.io: llama-3.1-70b-instruct-free (recommended), gpt-4o-mini, etc.
+          # AI model to use (default: llama-3.1-70b-instruct-free - FREE!)
+          # FREE models on llmgateway.io: llama-3.1-70b-instruct-free (recommended)
+          # Paid models: gpt-4o-mini, gpt-4, gpt-3.5-turbo (OpenAI/llmgateway.io)
           aiModel: llama-3.1-70b-instruct-free
           # Configure which types are allowed (newline-delimited).
           # Default: https://github.com/commitizen/conventional-commit-types
