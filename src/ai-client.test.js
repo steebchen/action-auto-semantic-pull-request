@@ -1,4 +1,4 @@
-const LlmGatewayClient = require('./llmGatewayClient');
+const AiClient = require('./ai-client');
 
 const mockHttpsRequest = jest.fn();
 const mockHttpsResponse = {
@@ -53,7 +53,7 @@ it('generates semantic title successfully', async () => {
     return req;
   });
 
-  const client = new LlmGatewayClient('test-api-key');
+  const client = new AiClient('test-api-key');
   const result = await client.generateSemanticTitle(
     'Add login feature',
     'This PR adds user login functionality'
@@ -94,11 +94,11 @@ it('throws error when API returns error status', async () => {
     return req;
   });
 
-  const client = new LlmGatewayClient('invalid-api-key');
+  const client = new AiClient('invalid-api-key');
 
   await expect(
     client.generateSemanticTitle('Add feature', 'Description')
-  ).rejects.toThrow('LLM Gateway API error: API key invalid');
+  ).rejects.toThrow('AI API error: API key invalid');
 });
 
 it('throws error when no content is received', async () => {
@@ -131,9 +131,59 @@ it('throws error when no content is received', async () => {
     return req;
   });
 
-  const client = new LlmGatewayClient('test-api-key');
+  const client = new AiClient('test-api-key');
 
   await expect(
     client.generateSemanticTitle('Add feature', 'Description')
-  ).rejects.toThrow('No content received from LLM Gateway API');
+  ).rejects.toThrow('No content received from AI API');
+});
+
+it('accepts custom base URL', async () => {
+  const mockResponse = {
+    choices: [
+      {
+        message: {
+          content: 'feat: Add custom API'
+        }
+      }
+    ]
+  };
+
+  mockHttpsRequest.mockImplementation((options, callback) => {
+    // Check that the custom base URL is used
+    expect(options.hostname).toBe('api.custom.com');
+
+    const req = {
+      on: jest.fn(),
+      write: jest.fn(),
+      end: jest.fn()
+    };
+
+    setTimeout(() => {
+      callback(mockHttpsResponse);
+      const dataCallback = mockHttpsResponse.on.mock.calls.find(
+        (call) => call[0] === 'data'
+      )[1];
+      const endCallback = mockHttpsResponse.on.mock.calls.find(
+        (call) => call[0] === 'end'
+      )[1];
+
+      dataCallback(JSON.stringify(mockResponse));
+      endCallback();
+    }, 0);
+
+    return req;
+  });
+
+  const client = new AiClient(
+    'test-api-key',
+    'owner/repo',
+    'https://api.custom.com'
+  );
+  const result = await client.generateSemanticTitle(
+    'Add custom API',
+    'This PR adds custom API functionality'
+  );
+
+  expect(result).toBe('feat: Add custom API');
 });

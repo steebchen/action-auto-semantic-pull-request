@@ -1,6 +1,6 @@
 # action-auto-semantic-pull-request
 
-**🤖 AI-Powered Fork**: This is a fork of [action-semantic-pull-request](https://github.com/amannn/action-semantic-pull-request) that **automatically generates semantic pull request titles using AI** powered by [llmgateway.io](https://llmgateway.io).
+**🤖 AI-Powered Fork**: This is a fork of [action-semantic-pull-request](https://github.com/amannn/action-semantic-pull-request) that **automatically generates semantic pull request titles using AI completions**. We recommend [llmgateway.io](https://llmgateway.io) as the easiest solution, but any OpenAI-compatible API can be used.
 
 This GitHub Action ensures that your pull request titles match the [Conventional Commits spec](https://www.conventionalcommits.org/) by automatically generating appropriate titles when they don't conform to the standard. When a PR title doesn't follow conventional commits format, the action uses AI to analyze the PR content and automatically set a properly formatted semantic title. Typically, this is used in combination with a tool like [semantic-release](https://github.com/semantic-release/semantic-release) to automate releases.
 
@@ -50,7 +50,7 @@ jobs:
       - uses: steebchen/action-auto-semantic-pull-request@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          LLM_GATEWAY_API_KEY: ${{ secrets.LLM_GATEWAY_API_KEY }}  # Required for AI title generation
+          AI_API_KEY: ${{ secrets.AI_API_KEY }}  # Required for AI title generation
 ```
 
 See the [event triggers documentation](#event-triggers) below to learn more about what `pull_request_target` means.
@@ -59,11 +59,14 @@ See the [event triggers documentation](#event-triggers) below to learn more abou
 
 To enable automatic semantic title generation, you need to:
 
-1. **Get an API key from [llmgateway.io](https://llmgateway.io)**
+1. **Get an API key from an OpenAI-compatible service:**
+   - **Recommended: [llmgateway.io](https://llmgateway.io)** - Easiest setup with built-in rate limiting and monitoring
+   - Alternative: OpenAI directly, Azure OpenAI, or any OpenAI-compatible API
 2. **Add the API key to your repository secrets:**
    - Go to your repository → Settings → Secrets and variables → Actions
-   - Add a new secret named `LLM_GATEWAY_API_KEY` with your API key as the value
+   - Add a new secret named `AI_API_KEY` with your API key as the value
 3. **Ensure the action has `pull-requests: write` permission** (shown in the example above)
+4. **(Optional) Configure custom AI base URL** if not using llmgateway.io
 
 When a pull request title doesn't conform to conventional commits format, the action will:
 1. Analyze the PR description, commit messages, and file changes
@@ -87,8 +90,12 @@ feat(ui): Add `Button` component
 
 ```yml
         with:
-          # Enable/disable AI title generation (default: true if LLM_GATEWAY_API_KEY is provided)
+          # Enable/disable AI title generation (default: true if AI_API_KEY is provided)
           aiTitleGeneration: true
+          # Custom AI API base URL (default: https://api.llmgateway.io)
+          # For OpenAI directly: https://api.openai.com
+          # For Azure OpenAI: https://your-resource.openai.azure.com
+          aiBaseUrl: https://api.llmgateway.io
           # Configure which types are allowed (newline-delimited).
           # Default: https://github.com/commitizen/conventional-commit-types
           types: |

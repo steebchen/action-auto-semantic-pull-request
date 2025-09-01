@@ -2,12 +2,13 @@ const https = require('https');
 const {URL} = require('url');
 
 /* global Promise */
+/* eslint-disable no-console */
 
-class LlmGatewayClient {
-  constructor(apiKey, repositorySlug) {
+class AiClient {
+  constructor(apiKey, repositorySlug, baseUrl = 'https://api.llmgateway.io') {
     this.apiKey = apiKey;
     this.repositorySlug = repositorySlug;
-    this.baseUrl = 'https://api.llmgateway.io';
+    this.baseUrl = baseUrl;
   }
 
   async generateSemanticTitle(currentTitle, description) {
@@ -27,9 +28,11 @@ class LlmGatewayClient {
       temperature: 0.3
     });
 
-    console.log(`[LLM Gateway] Making request to ${this.baseUrl}/v1/chat/completions`);
-    console.log(`[LLM Gateway] Repository: ${this.repositorySlug}`);
-    console.log(`[LLM Gateway] Request body:`, requestBody);
+    console.log(
+      `[AI Client] Making request to ${this.baseUrl}/v1/chat/completions`
+    );
+    console.log(`[AI Client] Repository: ${this.repositorySlug}`);
+    console.log(`[AI Client] Request body:`, requestBody);
 
     return new Promise((resolve, reject) => {
       const url = new URL('/v1/chat/completions', this.baseUrl);
@@ -56,19 +59,17 @@ class LlmGatewayClient {
         });
 
         res.on('end', () => {
-          console.log(`[LLM Gateway] Response status: ${res.statusCode}`);
-          console.log(`[LLM Gateway] Response data:`, data);
+          console.log(`[AI Client] Response status: ${res.statusCode}`);
+          console.log(`[AI Client] Response data:`, data);
 
           try {
             const response = JSON.parse(data);
 
             if (res.statusCode !== 200) {
-              console.log(`[LLM Gateway] API error:`, response.error);
+              console.log(`[AI Client] API error:`, response.error);
               reject(
                 new Error(
-                  `LLM Gateway API error: ${
-                    response.error?.message || 'Unknown error'
-                  }`
+                  `AI API error: ${response.error?.message || 'Unknown error'}`
                 )
               );
               return;
@@ -76,27 +77,25 @@ class LlmGatewayClient {
 
             const generatedTitle =
               response.choices?.[0]?.message?.content?.trim();
-            console.log(`[LLM Gateway] Generated title: "${generatedTitle}"`);
+            console.log(`[AI Client] Generated title: "${generatedTitle}"`);
 
             if (!generatedTitle) {
-              reject(new Error('No content received from LLM Gateway API'));
+              reject(new Error('No content received from AI API'));
               return;
             }
 
             resolve(generatedTitle);
           } catch (error) {
             reject(
-              new Error(
-                `Failed to parse LLM Gateway API response: ${error.message}`
-              )
+              new Error(`Failed to parse AI API response: ${error.message}`)
             );
           }
         });
       });
 
       req.on('error', (error) => {
-        console.log(`[LLM Gateway] Request error:`, error);
-        reject(new Error(`LLM Gateway API request failed: ${error.message}`));
+        console.log(`[AI Client] Request error:`, error);
+        reject(new Error(`AI API request failed: ${error.message}`));
       });
 
       req.write(requestBody);
@@ -105,4 +104,4 @@ class LlmGatewayClient {
   }
 }
 
-module.exports = LlmGatewayClient;
+module.exports = AiClient;

@@ -74,11 +74,19 @@ module.exports = function parseConfig() {
     ignoreLabels = ConfigParser.parseEnum(process.env.INPUT_IGNORELABELS);
   }
 
-  let llmGatewayApiKey;
-  if (process.env.INPUT_LLMGATEWAYAPIKEY) {
-    llmGatewayApiKey = ConfigParser.parseString(
-      process.env.INPUT_LLMGATEWAYAPIKEY
-    );
+  let aiApiKey;
+  if (process.env.AI_API_KEY) {
+    aiApiKey = ConfigParser.parseString(process.env.AI_API_KEY);
+  }
+
+  let aiBaseUrl;
+  if (process.env.INPUT_AIBASEURL) {
+    aiBaseUrl = ConfigParser.parseString(process.env.INPUT_AIBASEURL);
+  }
+
+  let aiModel;
+  if (process.env.INPUT_AIMODEL) {
+    aiModel = ConfigParser.parseString(process.env.INPUT_AIMODEL);
   }
 
   return {
@@ -95,6 +103,8 @@ module.exports = function parseConfig() {
     validateSingleCommitMatchesPrTitle,
     githubBaseUrl,
     ignoreLabels,
-    llmGatewayApiKey
+    aiApiKey,
+    aiBaseUrl,
+    aiModel
   };
 };

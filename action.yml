@@ -1,6 +1,6 @@
-name: semantic-pull-request
-author: Jan Amann <jan@amann.work>
-description: Ensure your PR title matches the Conventional Commits spec (https://www.conventionalcommits.org/).
+name: auto-semantic-pull-request
+author: Steven Benzaeken <hi@steebchen.com>
+description: Automatically generate and ensure your PR title matches the Conventional Commits spec using AI (https://www.conventionalcommits.org/).
 runs:
   using: 'node20'
   main: 'dist/index.js'
@@ -48,6 +48,7 @@ inputs:
   wip:
     description: "For work-in-progress PRs you can typically use draft pull requests from Github. However, private repositories on the free plan don't have this option and therefore this action allows you to opt-in to using the special '[WIP]' prefix to indicate this state. This will avoid the validation of the PR title and the pull request checks remain pending. Note that a second check will be reported if this is enabled."
     required: false
-  llmGatewayApiKey:
-    description: "API key for LLM Gateway service. When provided, instead of failing validation, the action will automatically generate a semantic commit title using AI."
+  aiBaseUrl:
+    description: "Base URL for AI completions API. Defaults to https://api.llmgateway.io (recommended for easiest setup). Can use any OpenAI-compatible API like OpenAI directly or Azure OpenAI."
     required: false
+    default: 'https://api.llmgateway.io'

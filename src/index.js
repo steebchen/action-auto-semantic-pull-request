@@ -1,6 +1,6 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const LlmGatewayClient = require('./llmGatewayClient');
+const AiClient = require('./ai-client');
 const parseConfig = require('./parseConfig');
 const validatePrTitle = require('./validatePrTitle');
 
@@ -21,10 +21,14 @@ module.exports = async function run() {
       validateSingleCommitMatchesPrTitle,
       githubBaseUrl,
       ignoreLabels,
-      llmGatewayApiKey
+      aiApiKey,
+      aiBaseUrl
     } = parseConfig();
 
-    core.info(`LLM Gateway API Key configured: ${llmGatewayApiKey ? 'Yes' : 'No'}`);
+    core.info(`AI API Key configured: ${aiApiKey ? 'Yes' : 'No'}`);
+    core.info(
+      `AI Base URL: ${aiBaseUrl || 'https://api.llmgateway.io (default)'}`
+    );
     core.info(`WIP mode enabled: ${wip ? 'Yes' : 'No'}`);
 
     const client = github.getOctokit(process.env.GITHUB_TOKEN, {
@@ -67,10 +71,12 @@ module.exports = async function run() {
 
     // Pull requests that start with "[WIP] " are excluded from the check.
     const isWip = wip && /^\[WIP\]\s/.test(pullRequest.title);
-    
+
     core.info(`PR title: "${pullRequest.title}"`);
     core.info(`Is WIP: ${isWip}`);
-    core.info(`Ignore labels: ${ignoreLabels ? ignoreLabels.join(', ') : 'None'}`);
+    core.info(
+      `Ignore labels: ${ignoreLabels ? ignoreLabels.join(', ') : 'None'}`
+    );
 
     let validationError;
     if (!isWip) {
@@ -149,18 +155,15 @@ module.exports = async function run() {
         }
       } catch (error) {
         core.info(`PR title validation failed: ${error.message}`);
-        if (llmGatewayApiKey) {
+        if (aiApiKey) {
           try {
             core.info(
-              'PR title validation failed, attempting to generate semantic title using LLM Gateway...'
+              'PR title validation failed, attempting to generate semantic title using AI...'
             );
 
             const repositorySlug = `${owner}/${repo}`;
-            const llmClient = new LlmGatewayClient(
-              llmGatewayApiKey,
-              repositorySlug
-            );
-            const generatedTitle = await llmClient.generateSemanticTitle(
+            const aiClient = new AiClient(aiApiKey, repositorySlug, aiBaseUrl);
+            const generatedTitle = await aiClient.generateSemanticTitle(
               pullRequest.title,
               pullRequest.body
             );
@@ -190,11 +193,11 @@ module.exports = async function run() {
             core.info('Generated title passed validation');
             // Clear the original validation error since LLM fixed it
             validationError = null;
-          } catch (llmError) {
+          } catch (aiError) {
             core.warning(
-              `Failed to generate or update PR title: ${llmError.message}`
+              `Failed to generate or update PR title: ${aiError.message}`
             );
-            // Keep the original validation error since LLM couldn't fix it
+            // Keep the original validation error since AI couldn't fix it
             validationError = error;
           }
         } else {
@@ -226,13 +229,17 @@ module.exports = async function run() {
       });
     }
 
-    core.info(`Final validation state - isWip: ${isWip}, validationError: ${validationError ? validationError.message : 'None'}`);
-    
+    core.info(
+      `Final validation state - isWip: ${isWip}, validationError: ${
+        validationError ? validationError.message : 'None'
+      }`
+    );
+
     if (!isWip && validationError) {
       core.info('Action failing due to validation error');
       throw validationError;
     }
-    
+
     core.info('Action completed successfully');
   } catch (error) {
     core.info(`=== Action failed with error: ${error.message} ===`);
