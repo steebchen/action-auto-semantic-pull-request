@@ -48,6 +48,9 @@ inputs:
   wip:
     description: "For work-in-progress PRs you can typically use draft pull requests from Github. However, private repositories on the free plan don't have this option and therefore this action allows you to opt-in to using the special '[WIP]' prefix to indicate this state. This will avoid the validation of the PR title and the pull request checks remain pending. Note that a second check will be reported if this is enabled."
     required: false
+  aiApiKey:
+    description: "API key for AI completions service. Get a free key from llmgateway.io (no credit card required). Required for AI title generation."
+    required: false
   aiBaseUrl:
     description: "Base URL for AI completions API. Defaults to https://api.llmgateway.io (recommended for easiest setup). Can use any OpenAI-compatible API like OpenAI directly or Azure OpenAI."
     required: false

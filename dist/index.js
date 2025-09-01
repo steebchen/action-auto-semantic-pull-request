@@ -34173,8 +34173,8 @@ module.exports = function parseConfig() {
   }
 
   let aiApiKey;
-  if (process.env.AI_API_KEY) {
-    aiApiKey = ConfigParser.parseString(process.env.AI_API_KEY);
+  if (process.env.INPUT_AIAPIKEY) {
+    aiApiKey = ConfigParser.parseString(process.env.INPUT_AIAPIKEY);
   }
 
   let aiBaseUrl;

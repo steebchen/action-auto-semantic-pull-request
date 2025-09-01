@@ -1,6 +1,6 @@
 # action-auto-semantic-pull-request
 
-**🤖 AI-Powered Fork**: This is a fork of [action-semantic-pull-request](https://github.com/amannn/action-semantic-pull-request) that **automatically generates semantic pull request titles using AI completions**. 
+**🤖 AI-Powered Fork**: This is a fork of [action-semantic-pull-request](https://github.com/amannn/action-semantic-pull-request) that **automatically generates semantic pull request titles using AI completions**.
 
 **✨ FREE to use**: Get started immediately with [llmgateway.io](https://llmgateway.io) - no credit card required for signup and uses free models by default. Any OpenAI-compatible API can also be used.
 
@@ -52,7 +52,8 @@ jobs:
       - uses: steebchen/action-auto-semantic-pull-request@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AI_API_KEY: ${{ secrets.AI_API_KEY }}  # Required for AI title generation
+        with:
+          aiApiKey: ${{ secrets.AI_API_KEY }}  # Required for AI title generation
 ```
 
 See the [event triggers documentation](#event-triggers) below to learn more about what `pull_request_target` means.
@@ -71,6 +72,7 @@ To enable automatic semantic title generation, you need to:
 2. **Add the API key to your repository secrets:**
    - Go to your repository → Settings → Secrets and variables → Actions
    - Add a new secret named `AI_API_KEY` with your API key as the value
+   - Use it in your workflow with `aiApiKey: ${{ secrets.AI_API_KEY }}` (see examples above and below)
 3. **Ensure the action has `pull-requests: write` permission** (shown in the example above)
 4. **(Optional) Configure custom AI base URL and model** if not using llmgateway.io defaults
 
@@ -98,10 +100,10 @@ feat(ui): Add `Button` component
 
 ```yml
         with:
-          # Enable/disable AI title generation (default: true if AI_API_KEY is provided)
+          # API key for AI completions (required for AI title generation)
+          aiApiKey: ${{ secrets.AI_API_KEY }}
+          # Enable/disable AI title generation (default: true if aiApiKey is provided)
           aiTitleGeneration: true
-          # Alternative: You can also pass the API key directly instead of using environment variable
-          # aiApiKey: ${{ secrets.AI_API_KEY }}
           # Custom AI API base URL (default: https://api.llmgateway.io)
           # For OpenAI directly: https://api.openai.com
           # For Azure OpenAI: https://your-resource.openai.azure.com
@@ -186,16 +188,17 @@ jobs:
     permissions:
       pull-requests: read
     steps:
-      - uses: amannn/action-semantic-pull-request@v5
+      - uses: steebchen/action-auto-semantic-pull-request@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          aiApiKey: ${{ secrets.AI_API_KEY }}
           wip: true
 ```
 
 ### Legacy configuration for validating single commits
 
-When using "Squash and merge" on a PR with only one commit, GitHub will suggest using that commit message instead of the PR title for the merge commit. As it's easy to commit this by mistake this action supports two configuration options to provide additional validation for this case. 
+When using "Squash and merge" on a PR with only one commit, GitHub will suggest using that commit message instead of the PR title for the merge commit. As it's easy to commit this by mistake this action supports two configuration options to provide additional validation for this case.
 
 ```yml
           # If the PR only contains a single commit, the action will validate that
@@ -244,10 +247,12 @@ jobs:
     permissions:
       pull-requests: read
     steps:
-      - uses: amannn/action-semantic-pull-request@v5
+      - uses: steebchen/action-auto-semantic-pull-request@main
         id: lint_pr_title
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          aiApiKey: ${{ secrets.AI_API_KEY }}
 
       - uses: marocchino/sticky-pull-request-comment@v2
         # When the previous steps fails, the workflow would stop. By adding this
@@ -257,11 +262,11 @@ jobs:
           header: pr-title-lint-error
           message: |
             Hey there and thank you for opening this pull request! 👋🏼
-            
+
             We require pull request titles to follow the [Conventional Commits specification](https://www.conventionalcommits.org/en/v1.0.0/) and it looks like your proposed title needs to be adjusted.
 
             Details:
-            
+
             ```
             ${{ steps.lint_pr_title.outputs.error_message }}
             ```
@@ -269,7 +274,7 @@ jobs:
       # Delete a previous comment when the issue has been resolved
       - if: ${{ steps.lint_pr_title.outputs.error_message == null }}
         uses: marocchino/sticky-pull-request-comment@v2
-        with:   
+        with:
           header: pr-title-lint-error
           delete: true
 ```
