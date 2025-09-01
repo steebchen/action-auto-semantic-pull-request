@@ -1,6 +1,6 @@
 name: auto-semantic-pull-request
 author: Steven Benzaeken <hi@steebchen.com>
-description: Automatically generate and ensure your PR title matches the Conventional Commits spec using AI (https://www.conventionalcommits.org/).
+description: Automatically generate and ensure your PR title matches the Conventional Commits spec using AI
 runs:
   using: 'node20'
   main: 'dist/index.js'
@@ -27,7 +27,7 @@ inputs:
     description: "If `subjectPattern` is configured, you can use this property to override the default error message that is shown when the pattern doesn't match. The variables `subject` and `title` can be used within the message."
     required: false
   validateSingleCommit:
-    description: "When using \"Squash and merge\" on a PR with only one commit, GitHub will suggest using that commit message instead of the PR title for the merge commit, and it's easy to commit this by mistake. Enable this option to also validate the commit message for one commit PRs." 
+    description: "When using \"Squash and merge\" on a PR with only one commit, GitHub will suggest using that commit message instead of the PR title for the merge commit, and it's easy to commit this by mistake. Enable this option to also validate the commit message for one commit PRs."
     required: false
   validateSingleCommitMatchesPrTitle:
     description: "Related to `validateSingleCommit` you can opt-in to validate that the PR title matches a single commit to avoid confusion."
