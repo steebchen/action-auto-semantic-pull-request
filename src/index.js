@@ -6,6 +6,7 @@ const validatePrTitle = require('./validatePrTitle');
 
 module.exports = async function run() {
   try {
+    core.info('=== Action auto-semantic-pull-request starting ===');
     const {
       types,
       scopes,
@@ -22,6 +23,9 @@ module.exports = async function run() {
       ignoreLabels,
       llmGatewayApiKey
     } = parseConfig();
+
+    core.info(`LLM Gateway API Key configured: ${llmGatewayApiKey ? 'Yes' : 'No'}`);
+    core.info(`WIP mode enabled: ${wip ? 'Yes' : 'No'}`);
 
     const client = github.getOctokit(process.env.GITHUB_TOKEN, {
       baseUrl: githubBaseUrl
@@ -55,6 +59,7 @@ module.exports = async function run() {
           core.info(
             `Validation was skipped because the PR label "${labelName}" was found.`
           );
+          core.info('Action completed early due to ignore label');
           return;
         }
       }
@@ -62,9 +67,14 @@ module.exports = async function run() {
 
     // Pull requests that start with "[WIP] " are excluded from the check.
     const isWip = wip && /^\[WIP\]\s/.test(pullRequest.title);
+    
+    core.info(`PR title: "${pullRequest.title}"`);
+    core.info(`Is WIP: ${isWip}`);
+    core.info(`Ignore labels: ${ignoreLabels ? ignoreLabels.join(', ') : 'None'}`);
 
     let validationError;
     if (!isWip) {
+      core.info(`Validating PR title: "${pullRequest.title}"`);
       try {
         await validatePrTitle(pullRequest.title, {
           types,
@@ -76,6 +86,8 @@ module.exports = async function run() {
           headerPattern,
           headerPatternCorrespondence
         });
+
+        core.info('PR title validation passed');
 
         if (validateSingleCommit) {
           const commits = [];
@@ -136,6 +148,7 @@ module.exports = async function run() {
           }
         }
       } catch (error) {
+        core.info(`PR title validation failed: ${error.message}`);
         if (llmGatewayApiKey) {
           try {
             core.info(
@@ -175,10 +188,13 @@ module.exports = async function run() {
             });
 
             core.info('Generated title passed validation');
+            // Clear the original validation error since LLM fixed it
+            validationError = null;
           } catch (llmError) {
             core.warning(
               `Failed to generate or update PR title: ${llmError.message}`
             );
+            // Keep the original validation error since LLM couldn't fix it
             validationError = error;
           }
         } else {
@@ -210,10 +226,16 @@ module.exports = async function run() {
       });
     }
 
+    core.info(`Final validation state - isWip: ${isWip}, validationError: ${validationError ? validationError.message : 'None'}`);
+    
     if (!isWip && validationError) {
+      core.info('Action failing due to validation error');
       throw validationError;
     }
+    
+    core.info('Action completed successfully');
   } catch (error) {
+    core.info(`=== Action failed with error: ${error.message} ===`);
     core.setFailed(error.message);
   }
 };

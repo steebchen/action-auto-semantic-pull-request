@@ -16,7 +16,7 @@ class LlmGatewayClient {
     }", generate a semantic commit title following the Conventional Commits specification (https://www.conventionalcommits.org/). The title should be maximum 50 characters and follow the format: type(scope): subject. Common types include: feat, fix, docs, style, refactor, test, chore. Return only the semantic title, nothing else.`;
 
     const requestBody = JSON.stringify({
-      model: 'gpt-5-mini',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'user',
@@ -26,6 +26,10 @@ class LlmGatewayClient {
       max_tokens: 60,
       temperature: 0.3
     });
+
+    console.log(`[LLM Gateway] Making request to ${this.baseUrl}/v1/chat/completions`);
+    console.log(`[LLM Gateway] Repository: ${this.repositorySlug}`);
+    console.log(`[LLM Gateway] Request body:`, requestBody);
 
     return new Promise((resolve, reject) => {
       const url = new URL('/v1/chat/completions', this.baseUrl);
@@ -52,10 +56,14 @@ class LlmGatewayClient {
         });
 
         res.on('end', () => {
+          console.log(`[LLM Gateway] Response status: ${res.statusCode}`);
+          console.log(`[LLM Gateway] Response data:`, data);
+
           try {
             const response = JSON.parse(data);
 
             if (res.statusCode !== 200) {
+              console.log(`[LLM Gateway] API error:`, response.error);
               reject(
                 new Error(
                   `LLM Gateway API error: ${
@@ -68,6 +76,8 @@ class LlmGatewayClient {
 
             const generatedTitle =
               response.choices?.[0]?.message?.content?.trim();
+            console.log(`[LLM Gateway] Generated title: "${generatedTitle}"`);
+
             if (!generatedTitle) {
               reject(new Error('No content received from LLM Gateway API'));
               return;
@@ -85,6 +95,7 @@ class LlmGatewayClient {
       });
 
       req.on('error', (error) => {
+        console.log(`[LLM Gateway] Request error:`, error);
         reject(new Error(`LLM Gateway API request failed: ${error.message}`));
       });
 

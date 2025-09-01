@@ -33720,6 +33720,7 @@ const validatePrTitle = __nccwpck_require__(3661);
 
 module.exports = async function run() {
   try {
+    core.info('=== Action auto-semantic-pull-request starting ===');
     const {
       types,
       scopes,
@@ -33736,6 +33737,9 @@ module.exports = async function run() {
       ignoreLabels,
       llmGatewayApiKey
     } = parseConfig();
+
+    core.info(`LLM Gateway API Key configured: ${llmGatewayApiKey ? 'Yes' : 'No'}`);
+    core.info(`WIP mode enabled: ${wip ? 'Yes' : 'No'}`);
 
     const client = github.getOctokit(process.env.GITHUB_TOKEN, {
       baseUrl: githubBaseUrl
@@ -33769,6 +33773,7 @@ module.exports = async function run() {
           core.info(
             `Validation was skipped because the PR label "${labelName}" was found.`
           );
+          core.info('Action completed early due to ignore label');
           return;
         }
       }
@@ -33776,9 +33781,14 @@ module.exports = async function run() {
 
     // Pull requests that start with "[WIP] " are excluded from the check.
     const isWip = wip && /^\[WIP\]\s/.test(pullRequest.title);
+    
+    core.info(`PR title: "${pullRequest.title}"`);
+    core.info(`Is WIP: ${isWip}`);
+    core.info(`Ignore labels: ${ignoreLabels ? ignoreLabels.join(', ') : 'None'}`);
 
     let validationError;
     if (!isWip) {
+      core.info(`Validating PR title: "${pullRequest.title}"`);
       try {
         await validatePrTitle(pullRequest.title, {
           types,
@@ -33790,6 +33800,8 @@ module.exports = async function run() {
           headerPattern,
           headerPatternCorrespondence
         });
+
+        core.info('PR title validation passed');
 
         if (validateSingleCommit) {
           const commits = [];
@@ -33850,13 +33862,18 @@ module.exports = async function run() {
           }
         }
       } catch (error) {
+        core.info(`PR title validation failed: ${error.message}`);
         if (llmGatewayApiKey) {
           try {
             core.info(
               'PR title validation failed, attempting to generate semantic title using LLM Gateway...'
             );
 
-            const llmClient = new LlmGatewayClient(llmGatewayApiKey);
+            const repositorySlug = `${owner}/${repo}`;
+            const llmClient = new LlmGatewayClient(
+              llmGatewayApiKey,
+              repositorySlug
+            );
             const generatedTitle = await llmClient.generateSemanticTitle(
               pullRequest.title,
               pullRequest.body
@@ -33885,10 +33902,13 @@ module.exports = async function run() {
             });
 
             core.info('Generated title passed validation');
+            // Clear the original validation error since LLM fixed it
+            validationError = null;
           } catch (llmError) {
             core.warning(
               `Failed to generate or update PR title: ${llmError.message}`
             );
+            // Keep the original validation error since LLM couldn't fix it
             validationError = error;
           }
         } else {
@@ -33920,10 +33940,16 @@ module.exports = async function run() {
       });
     }
 
+    core.info(`Final validation state - isWip: ${isWip}, validationError: ${validationError ? validationError.message : 'None'}`);
+    
     if (!isWip && validationError) {
+      core.info('Action failing due to validation error');
       throw validationError;
     }
+    
+    core.info('Action completed successfully');
   } catch (error) {
+    core.info(`=== Action failed with error: ${error.message} ===`);
     core.setFailed(error.message);
   }
 };
@@ -33940,8 +33966,9 @@ const {URL} = __nccwpck_require__(7310);
 /* global Promise */
 
 class LlmGatewayClient {
-  constructor(apiKey) {
+  constructor(apiKey, repositorySlug) {
     this.apiKey = apiKey;
+    this.repositorySlug = repositorySlug;
     this.baseUrl = 'https://api.llmgateway.io';
   }
 
@@ -33951,7 +33978,7 @@ class LlmGatewayClient {
     }", generate a semantic commit title following the Conventional Commits specification (https://www.conventionalcommits.org/). The title should be maximum 50 characters and follow the format: type(scope): subject. Common types include: feat, fix, docs, style, refactor, test, chore. Return only the semantic title, nothing else.`;
 
     const requestBody = JSON.stringify({
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'user',
@@ -33961,6 +33988,10 @@ class LlmGatewayClient {
       max_tokens: 60,
       temperature: 0.3
     });
+
+    console.log(`[LLM Gateway] Making request to ${this.baseUrl}/v1/chat/completions`);
+    console.log(`[LLM Gateway] Repository: ${this.repositorySlug}`);
+    console.log(`[LLM Gateway] Request body:`, requestBody);
 
     return new Promise((resolve, reject) => {
       const url = new URL('/v1/chat/completions', this.baseUrl);
@@ -33973,7 +34004,9 @@ class LlmGatewayClient {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${this.apiKey}`,
-          'Content-Length': Buffer.byteLength(requestBody)
+          'Content-Length': Buffer.byteLength(requestBody),
+          'x-llmgateway-kind': 'auto-pr',
+          'x-llmgateway-repo': this.repositorySlug
         }
       };
 
@@ -33985,10 +34018,14 @@ class LlmGatewayClient {
         });
 
         res.on('end', () => {
+          console.log(`[LLM Gateway] Response status: ${res.statusCode}`);
+          console.log(`[LLM Gateway] Response data:`, data);
+
           try {
             const response = JSON.parse(data);
 
             if (res.statusCode !== 200) {
+              console.log(`[LLM Gateway] API error:`, response.error);
               reject(
                 new Error(
                   `LLM Gateway API error: ${
@@ -34001,6 +34038,8 @@ class LlmGatewayClient {
 
             const generatedTitle =
               response.choices?.[0]?.message?.content?.trim();
+            console.log(`[LLM Gateway] Generated title: "${generatedTitle}"`);
+
             if (!generatedTitle) {
               reject(new Error('No content received from LLM Gateway API'));
               return;
@@ -34018,6 +34057,7 @@ class LlmGatewayClient {
       });
 
       req.on('error', (error) => {
+        console.log(`[LLM Gateway] Request error:`, error);
         reject(new Error(`LLM Gateway API request failed: ${error.message}`));
       });
 
@@ -34495,12 +34535,15 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(4351);
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
+const run = __nccwpck_require__(4351);
+
+run();
+
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
