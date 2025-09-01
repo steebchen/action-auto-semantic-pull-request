@@ -142,7 +142,11 @@ module.exports = async function run() {
               'PR title validation failed, attempting to generate semantic title using LLM Gateway...'
             );
 
-            const llmClient = new LlmGatewayClient(llmGatewayApiKey);
+            const repositorySlug = `${owner}/${repo}`;
+            const llmClient = new LlmGatewayClient(
+              llmGatewayApiKey,
+              repositorySlug
+            );
             const generatedTitle = await llmClient.generateSemanticTitle(
               pullRequest.title,
               pullRequest.body

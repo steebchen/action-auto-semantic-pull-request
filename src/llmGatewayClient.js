@@ -4,8 +4,9 @@ const {URL} = require('url');
 /* global Promise */
 
 class LlmGatewayClient {
-  constructor(apiKey) {
+  constructor(apiKey, repositorySlug) {
     this.apiKey = apiKey;
+    this.repositorySlug = repositorySlug;
     this.baseUrl = 'https://api.llmgateway.io';
   }
 
@@ -37,7 +38,9 @@ class LlmGatewayClient {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${this.apiKey}`,
-          'Content-Length': Buffer.byteLength(requestBody)
+          'Content-Length': Buffer.byteLength(requestBody),
+          'x-llmgateway-kind': 'auto-pr',
+          'x-llmgateway-repo': this.repositorySlug
         }
       };
 
