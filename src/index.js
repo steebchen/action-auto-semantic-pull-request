@@ -22,12 +22,16 @@ module.exports = async function run() {
       githubBaseUrl,
       ignoreLabels,
       aiApiKey,
-      aiBaseUrl
+      aiBaseUrl,
+      aiModel
     } = parseConfig();
 
     core.info(`AI API Key configured: ${aiApiKey ? 'Yes' : 'No'}`);
     core.info(
       `AI Base URL: ${aiBaseUrl || 'https://api.llmgateway.io (default)'}`
+    );
+    core.info(
+      `AI Model: ${aiModel || 'llama-3.1-70b-instruct-free (default)'}`
     );
     core.info(`WIP mode enabled: ${wip ? 'Yes' : 'No'}`);
 
@@ -162,7 +166,12 @@ module.exports = async function run() {
             );
 
             const repositorySlug = `${owner}/${repo}`;
-            const aiClient = new AiClient(aiApiKey, repositorySlug, aiBaseUrl);
+            const aiClient = new AiClient(
+              aiApiKey,
+              repositorySlug,
+              aiBaseUrl,
+              aiModel
+            );
             const generatedTitle = await aiClient.generateSemanticTitle(
               pullRequest.title,
               pullRequest.body

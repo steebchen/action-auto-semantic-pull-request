@@ -187,3 +187,94 @@ it('accepts custom base URL', async () => {
 
   expect(result).toBe('feat: Add custom API');
 });
+
+it('uses llama-3.1-70b-instruct-free as default model', async () => {
+  const mockResponse = {
+    choices: [
+      {
+        message: {
+          content: 'feat: Add llama feature'
+        }
+      }
+    ]
+  };
+
+  let requestBodyParsed;
+  mockHttpsRequest.mockImplementation((options, callback) => {
+    const req = {
+      on: jest.fn(),
+      write: jest.fn((body) => {
+        requestBodyParsed = JSON.parse(body);
+      }),
+      end: jest.fn()
+    };
+
+    setTimeout(() => {
+      callback(mockHttpsResponse);
+      const dataCallback = mockHttpsResponse.on.mock.calls.find(
+        (call) => call[0] === 'data'
+      )[1];
+      const endCallback = mockHttpsResponse.on.mock.calls.find(
+        (call) => call[0] === 'end'
+      )[1];
+
+      dataCallback(JSON.stringify(mockResponse));
+      endCallback();
+    }, 0);
+
+    return req;
+  });
+
+  const client = new AiClient('test-api-key');
+  await client.generateSemanticTitle('Add feature', 'Description');
+
+  expect(requestBodyParsed.model).toBe('llama-3.1-70b-instruct-free');
+});
+
+it('uses custom model when specified', async () => {
+  const mockResponse = {
+    choices: [
+      {
+        message: {
+          content: 'feat: Add custom model feature'
+        }
+      }
+    ]
+  };
+
+  let requestBodyParsed;
+  mockHttpsRequest.mockImplementation((options, callback) => {
+    const req = {
+      on: jest.fn(),
+      write: jest.fn((body) => {
+        requestBodyParsed = JSON.parse(body);
+      }),
+      end: jest.fn()
+    };
+
+    setTimeout(() => {
+      callback(mockHttpsResponse);
+      const dataCallback = mockHttpsResponse.on.mock.calls.find(
+        (call) => call[0] === 'data'
+      )[1];
+      const endCallback = mockHttpsResponse.on.mock.calls.find(
+        (call) => call[0] === 'end'
+      )[1];
+
+      dataCallback(JSON.stringify(mockResponse));
+      endCallback();
+    }, 0);
+
+    return req;
+  });
+
+  const client = new AiClient(
+    'test-api-key',
+    'owner/repo',
+    'https://api.llmgateway.io',
+    'gpt-4o-mini'
+  );
+  await client.generateSemanticTitle('Add feature', 'Description');
+
+  expect(requestBodyParsed.model).toBe('gpt-4o-mini');
+});

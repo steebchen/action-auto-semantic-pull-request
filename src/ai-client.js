@@ -5,10 +5,16 @@ const {URL} = require('url');
 /* eslint-disable no-console */
 
 class AiClient {
-  constructor(apiKey, repositorySlug, baseUrl = 'https://api.llmgateway.io') {
+  constructor(
+    apiKey,
+    repositorySlug,
+    baseUrl = 'https://api.llmgateway.io',
+    model = 'llama-3.1-70b-instruct-free'
+  ) {
     this.apiKey = apiKey;
     this.repositorySlug = repositorySlug;
     this.baseUrl = baseUrl;
+    this.model = model;
   }
 
   async generateSemanticTitle(currentTitle, description) {
@@ -17,7 +23,7 @@ class AiClient {
     }", generate a semantic commit title following the Conventional Commits specification (https://www.conventionalcommits.org/). The title should be maximum 50 characters and follow the format: type(scope): subject. Common types include: feat, fix, docs, style, refactor, test, chore. Return only the semantic title, nothing else.`;
 
     const requestBody = JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: this.model,
       messages: [
         {
           role: 'user',

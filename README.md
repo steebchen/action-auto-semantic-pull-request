@@ -96,6 +96,10 @@ feat(ui): Add `Button` component
           # For OpenAI directly: https://api.openai.com
           # For Azure OpenAI: https://your-resource.openai.azure.com
           aiBaseUrl: https://api.llmgateway.io
+          # AI model to use (default: llama-3.1-70b-instruct-free)
+          # For OpenAI: gpt-4o-mini, gpt-4, gpt-3.5-turbo
+          # For llmgateway.io: llama-3.1-70b-instruct-free (recommended), gpt-4o-mini, etc.
+          aiModel: llama-3.1-70b-instruct-free
           # Configure which types are allowed (newline-delimited).
           # Default: https://github.com/commitizen/conventional-commit-types
           types: |

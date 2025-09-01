@@ -52,3 +52,7 @@ inputs:
     description: "Base URL for AI completions API. Defaults to https://api.llmgateway.io (recommended for easiest setup). Can use any OpenAI-compatible API like OpenAI directly or Azure OpenAI."
     required: false
     default: 'https://api.llmgateway.io'
+  aiModel:
+    description: "AI model to use for generating semantic titles. Defaults to llama-3.1-70b-instruct-free (recommended for llmgateway.io). For OpenAI use gpt-4o-mini, gpt-4, etc."
+    required: false
+    default: 'llama-3.1-70b-instruct-free'
