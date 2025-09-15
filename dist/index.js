@@ -33707,7 +33707,7 @@ class AiClient {
     apiKey,
     repositorySlug,
     baseUrl = 'https://api.llmgateway.io',
-    model = 'llama-3.1-70b-instruct-free'
+    model = 'llama-3.3-70b-instruct-free'
   ) {
     this.apiKey = apiKey;
     this.repositorySlug = repositorySlug;
@@ -33867,7 +33867,7 @@ module.exports = async function run() {
       `AI Base URL: ${aiBaseUrl || 'https://api.llmgateway.io (default)'}`
     );
     core.info(
-      `AI Model: ${aiModel || 'llama-3.1-70b-instruct-free (default)'}`
+      `AI Model: ${aiModel || 'llama-3.3-70b-instruct-free (default)'}`
     );
     core.info(`WIP mode enabled: ${wip ? 'Yes' : 'No'}`);
 
