@@ -188,12 +188,12 @@ it('accepts custom base URL', async () => {
   expect(result).toBe('feat: Add custom API');
 });
 
-it('uses llama-3.3-70b-instruct-free as default model', async () => {
+it('uses auto as default model with free_models_only flag', async () => {
   const mockResponse = {
     choices: [
       {
         message: {
-          content: 'feat: Add llama feature'
+          content: 'feat: Add auto model feature'
         }
       }
     ]
@@ -228,10 +228,11 @@ it('uses llama-3.3-70b-instruct-free as default model', async () => {
   const client = new AiClient('test-api-key');
   await client.generateSemanticTitle('Add feature', 'Description');
 
-  expect(requestBodyParsed.model).toBe('llama-3.3-70b-instruct-free');
+  expect(requestBodyParsed.model).toBe('auto');
+  expect(requestBodyParsed.free_models_only).toBe(true);
 });
 
-it('uses custom model when specified', async () => {
+it('uses custom model when specified without free_models_only flag', async () => {
   const mockResponse = {
     choices: [
       {
@@ -277,4 +278,5 @@ it('uses custom model when specified', async () => {
   await client.generateSemanticTitle('Add feature', 'Description');
 
   expect(requestBodyParsed.model).toBe('gpt-4o-mini');
+  expect(requestBodyParsed.free_models_only).toBeUndefined();
 });
