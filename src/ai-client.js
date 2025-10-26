@@ -30,7 +30,7 @@ class AiClient {
           content: prompt
         }
       ],
-      max_tokens: 60,
+      max_tokens: 100,
       temperature: 0.3
     };
 
