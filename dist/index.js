@@ -33707,7 +33707,7 @@ class AiClient {
     apiKey,
     repositorySlug,
     baseUrl = 'https://api.llmgateway.io',
-    model = 'llama-3.3-70b-instruct-free'
+    model = 'auto'
   ) {
     this.apiKey = apiKey;
     this.repositorySlug = repositorySlug;
@@ -33720,7 +33720,7 @@ class AiClient {
       description || 'No description provided'
     }", generate a semantic commit title following the Conventional Commits specification (https://www.conventionalcommits.org/). The title should be maximum 50 characters and follow the format: type(scope): subject. Common types include: feat, fix, docs, style, refactor, test, chore. Return only the semantic title, nothing else.`;
 
-    const requestBody = JSON.stringify({
+    const requestPayload = {
       model: this.model,
       messages: [
         {
@@ -33728,9 +33728,15 @@ class AiClient {
           content: prompt
         }
       ],
-      max_tokens: 60,
       temperature: 0.3
-    });
+    };
+
+    // Only add free_models_only flag when using 'auto' model
+    if (this.model === 'auto') {
+      requestPayload.free_models_only = true;
+    }
+
+    const requestBody = JSON.stringify(requestPayload);
 
     console.log(
       `[AI Client] Making request to ${this.baseUrl}/v1/chat/completions`
